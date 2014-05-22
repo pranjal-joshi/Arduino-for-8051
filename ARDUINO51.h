@@ -63,8 +63,11 @@
 #define PIN38 38
 #define PIN39 39
 
-volatile unsigned char uart_read[32];
+volatile unsigned char uart_read;
 volatile unsigned char uart_read_count = 0;
+
+unsigned char rs_pin,en_pin,d4_pin,d5_pin,d6_pin,d7_pin;
+unsigned char rs_pin_val,en_pin_val,d4_pin_val,d5_pin_val,d6_pin_val,d7_pin_val;
 
 void setup(void);		// executes only once
 void loop(void);		// executes infinitely
@@ -149,6 +152,39 @@ unsigned char digitalRead(unsigned char pin)
 		else
 			return 0;
 	}
+	if(pin > 9 && pin < 18 )
+	{
+		digitalWrite(pin,LOW);
+		readlow = P3;
+		digitalWrite(pin,HIGH);
+		readhigh = P3;
+		if(readlow != readhigh)
+			return 1;
+		else
+			return 0;
+	}
+	if(pin > 20 && pin < 29 )
+	{
+		digitalWrite(pin,LOW);
+		readlow = P2;
+		digitalWrite(pin,HIGH);
+		readhigh = P2;
+		if(readlow != readhigh)
+			return 1;
+		else
+			return 0;
+	}
+	if(pin > 31 && pin < 40 )
+	{
+		digitalWrite(pin,LOW);
+		readlow = P0;
+		digitalWrite(pin,HIGH);
+		readhigh = P0;
+		if(readlow != readhigh)
+			return 1;
+		else
+			return 0;
+	}
 }
 
 void delay(unsigned long millisec)
@@ -206,9 +242,8 @@ void serial_read() interrupt 4
 	if(RI == 1)
 	{
 		RI = 0;
-		uart_read[uart_read_count] = SBUF;
+		uart_read = SBUF;
 		uart_read_count++;
-		SBUF = uart_read[uart_read_count];
 	}
 	else
 		TI = 0;
@@ -240,7 +275,7 @@ void serial_printlnInt(long num)
 {
 	char buf[8] = {0,0,0,0,
 								 0,0,0,0};
-	unsigned char temp,i,cnt = 0;
+	unsigned char cnt = 0;
 	if(num != 0)
 	{
 		while(num > 0)
@@ -268,6 +303,66 @@ void serial_printInt(long num)
 		}
 	}
 	serial_print(buf);
+}
+
+void lcd_begin(unsigned char rs, unsigned char en, unsigned char d4, unsigned char d5, unsigned char d6, unsigned char d7)
+{
+	rs_pin = rs;
+	en_pin = en;
+	d4_pin = d4;
+	d5_pin = d5;
+	d6_pin = d6;
+	d7_pin = d7;
+}
+
+void lcdWrite(unsigned char val)
+{
+	unsigned char temp;
+	temp = val;
+	val &= 0xF0;
+	d4_pin_val = val & 0x10;	// val & 00010000
+	d5_pin_val = val & 0x20;	// val & 00100000
+	d5_pin_val = val & 0x40;	// val & 01000000
+	d6_pin_val = val & 0x80;	// val & 10000000
+	digitalWrite(d4_pin,d4_pin_val);
+	digitalWrite(d5_pin,d5_pin_val);
+	digitalWrite(d6_pin,d6_pin_val);
+	digitalWrite(d7_pin,d7_pin_val);
+	digitalWrite(en_pin,HIGH);
+	delay(5);
+	digitalWrite(en_pin,LOW);
+	val = temp << 4;
+	val &= 0xF0;
+	d4_pin_val = val & 0x10;	// val & 00010000
+	d5_pin_val = val & 0x20;	// val & 00100000
+	d5_pin_val = val & 0x40;	// val & 01000000
+	d6_pin_val = val & 0x80;	// val & 10000000
+	digitalWrite(d4_pin,d4_pin_val);
+	digitalWrite(d5_pin,d5_pin_val);
+	digitalWrite(d6_pin,d6_pin_val);
+	digitalWrite(d7_pin,d7_pin_val);
+	digitalWrite(en_pin,HIGH);
+	delay(5);
+	digitalWrite(en_pin,LOW);
+}
+
+void lcdcmd(unsigned char cmd)
+{
+	digitalWrite(rs_pin,LOW);
+	lcdWrite(cmd);
+}
+
+void lcddata(unsigned char LCDdata)
+{
+	digitalWrite(rs_pin,HIGH);
+	lcdWrite(LCDdata);
+}
+
+void lcd_print(unsigned char *str)
+{
+	unsigned int x;
+	for(x=0;str[x]!=0;x++)
+		lcddata(str[x]);
 }
 
 void main()
