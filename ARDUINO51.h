@@ -10,9 +10,11 @@
 
 /*
 	NOTES:
-		CPU frequency must be 29.4912MHz crystal to obtain correct results.
-		ANY CHANGES IN OSC. FREQ WILL CAUSE GARBAGE DATA ON SERIAL.
-		ANY CHANGES IN OSC. FREQ WILL DISTURB DELAY ROUTINES.
+		*** CPU frequency must be 29.4912MHz or 11.0592MHz to obtain correct delay results.
+		*** ANY CHANGES IN OSC. FREQ WILL CAUSE GARBAGE DATA ON SERIAL.
+		*** ANY CHANGES IN OSC. FREQ WILL DISTURB DELAY ROUTINES.
+		*** MINIMUM BAUDRATE FOR 29.4912MHz IS 19200. (FOR 9600 USE 11.0592MHz OSC.).
+		*** MAXIMUM BAUDRATE WITH 29.4912MHz IS 115200.
 */
 #include <reg52.h>
 #include <stdio.h>
@@ -21,7 +23,7 @@
 #ifndef __ARDUINO51_H__
 #define __ARDUINO51_H__
 
-#define F_OSC 29491200	// oscillator freq.
+//#define F_OSC 29491200 //11059200 //29491200	// oscillator freq.
 
 #define HIGH 1 			// high means 1
 #define LOW 0				// low means 0
@@ -69,11 +71,17 @@ volatile unsigned char uart_read_count = 0;
 unsigned char rs_pin,en_pin,d4_pin,d5_pin,d6_pin,d7_pin;
 unsigned char rs_pin_val,en_pin_val,d4_pin_val,d5_pin_val,d6_pin_val,d7_pin_val;
 
+unsigned long TIMER_VALUE, ONE_MS_VALUE;
+double T_MACHINE, F_MACHINE;
+unsigned int TIMER_VALUE_LOW, TIMER_VALUE_HIGH;
+
 void setup(void);		// executes only once
 void loop(void);		// executes infinitely
 
 /* This char array helps to convert pin map to port*/
 code const unsigned char pinToPort[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+code const unsigned char pinToPortInverted[] = { 128, 64, 32, 16, 8, 4, 2, 1 };
+
 
 /*
 This function write 1 or 0 to particular pin.
@@ -125,7 +133,7 @@ void digitalWrite(unsigned char pin, unsigned char val)
 	}
 	else if(pin > 31 && pin < 40)
 	{
-		p = pinToPort[pin - 32];
+		p = pinToPortInverted[pin - 32];
 		if(val == HIGH)
 		{
 			P0 |= p;
@@ -187,6 +195,17 @@ unsigned char digitalRead(unsigned char pin)
 	}
 }
 
+void delayTimerValueCalculation()
+{
+	F_MACHINE = (F_OSC/12);
+	T_MACHINE = (1/F_MACHINE);
+	ONE_MS_VALUE = (0.001/T_MACHINE);
+	TIMER_VALUE = (0xFFFF - ONE_MS_VALUE);
+	TIMER_VALUE_LOW = (0x00FF & TIMER_VALUE);
+	TIMER_VALUE_HIGH = (0xFF00 & TIMER_VALUE);
+	//TIMER_VALUE_HIGH = (TIMER_VALUE_HIGH >> 8);
+}
+
 void delay(unsigned long millisec)
 {
 	unsigned char tlow,thigh,isInterrupt;
@@ -200,11 +219,17 @@ void delay(unsigned long millisec)
 		ET0 = 0;
 		isInterrupt = 1;
 	}
-	millisec *= 12;
+	// following loop increment added by trial-&-error method.
+	// You may change the multiplier to obtian more accurate
+	// result depending on your application.
+	if(F_OSC == 29491200)
+		millisec *= 10;
+	else if(F_OSC == 11059200)
+		millisec *= 4;
 	for(cnt=0;cnt<=millisec;cnt++)
 	{
-		TH0 = 0xF6;
-		TL0 = 0x60;
+		TH0 = TIMER_VALUE_HIGH;
+		TL0 = TIMER_VALUE_LOW;
 		TR0 = 1;
 		while(TF0 == 0);
 		TR0 = 0;
@@ -221,152 +246,9 @@ long map(long x, long in_min, long in_max, long out_min, long out_max)
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void serial_begin(unsigned long baudrate)
-{
-	unsigned long register_value;
-	register_value = (65536 - (F_OSC/(baudrate * 32)));
-	SCON = 0x50;
-	T2CON &= 0xF0;
-	T2CON |= 0x30;
-	RCAP2L = (register_value & 0xFF);
-	RCAP2H = (register_value >> 8) & 0xFF;
-	TH2 = RCAP2H;
-	TL2 = RCAP2L;
-	ES = 1;
-	EA = 1;
-	TR2 = 1;
-}
-
-void serial_read() interrupt 4
-{
-	if(RI == 1)
-	{
-		RI = 0;
-		uart_read = SBUF;
-		uart_read_count++;
-	}
-	else
-		TI = 0;
-}
-
-void serialSend(unsigned char info)
-{
-	SBUF = info;
-	delay(1);
-}
-
-void serial_print(unsigned char *str)
-{
-	unsigned int x;
-	for(x=0;str[x]!=0;x++)
-		serialSend(str[x]);
-}
-
-void serial_println(unsigned char *str)
-{
-	unsigned int x;
-	for(x=0;str[x]!=0;x++)
-		serialSend(str[x]);
-	serialSend('\n');
-	serialSend('\r');
-}
-
-void serial_printlnInt(long num)
-{
-	char buf[8] = {0,0,0,0,
-								 0,0,0,0};
-	unsigned char cnt = 0;
-	if(num != 0)
-	{
-		while(num > 0)
-		{
-			buf[cnt] = (num % 10) + 48;
-			num /= 10;
-			cnt++;
-		}
-	}
-	serial_println(buf);
-}
-
-void serial_printInt(long num)
-{
-	char buf[8] = {0,0,0,0,
-								 0,0,0,0};
-	unsigned char cnt = 0;
-	if(num != 0)
-	{
-		while(num > 0)
-		{
-			buf[cnt] = (num % 10) + 48;
-			num /= 10;
-			cnt++;
-		}
-	}
-	serial_print(buf);
-}
-
-void lcd_begin(unsigned char rs, unsigned char en, unsigned char d4, unsigned char d5, unsigned char d6, unsigned char d7)
-{
-	rs_pin = rs;
-	en_pin = en;
-	d4_pin = d4;
-	d5_pin = d5;
-	d6_pin = d6;
-	d7_pin = d7;
-}
-
-void lcdWrite(unsigned char val)
-{
-	unsigned char temp;
-	temp = val;
-	val &= 0xF0;
-	d4_pin_val = val & 0x10;	// val & 00010000
-	d5_pin_val = val & 0x20;	// val & 00100000
-	d5_pin_val = val & 0x40;	// val & 01000000
-	d6_pin_val = val & 0x80;	// val & 10000000
-	digitalWrite(d4_pin,d4_pin_val);
-	digitalWrite(d5_pin,d5_pin_val);
-	digitalWrite(d6_pin,d6_pin_val);
-	digitalWrite(d7_pin,d7_pin_val);
-	digitalWrite(en_pin,HIGH);
-	delay(5);
-	digitalWrite(en_pin,LOW);
-	val = temp << 4;
-	val &= 0xF0;
-	d4_pin_val = val & 0x10;	// val & 00010000
-	d5_pin_val = val & 0x20;	// val & 00100000
-	d5_pin_val = val & 0x40;	// val & 01000000
-	d6_pin_val = val & 0x80;	// val & 10000000
-	digitalWrite(d4_pin,d4_pin_val);
-	digitalWrite(d5_pin,d5_pin_val);
-	digitalWrite(d6_pin,d6_pin_val);
-	digitalWrite(d7_pin,d7_pin_val);
-	digitalWrite(en_pin,HIGH);
-	delay(5);
-	digitalWrite(en_pin,LOW);
-}
-
-void lcdcmd(unsigned char cmd)
-{
-	digitalWrite(rs_pin,LOW);
-	lcdWrite(cmd);
-}
-
-void lcddata(unsigned char LCDdata)
-{
-	digitalWrite(rs_pin,HIGH);
-	lcdWrite(LCDdata);
-}
-
-void lcd_print(unsigned char *str)
-{
-	unsigned int x;
-	for(x=0;str[x]!=0;x++)
-		lcddata(str[x]);
-}
-
 void main()
 {
+	delayTimerValueCalculation();
 	setup();
 	while(1)
 	{
