@@ -1,4 +1,3 @@
-
 /*
 	Arduino51 LCD example.
 	Author	: Pranjal Joshi

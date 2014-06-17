@@ -64,6 +64,13 @@
 #define PIN37 37
 #define PIN38 38
 #define PIN39 39
+/* --- PWM Pins (Port 0) --- */
+sbit PWM39 = P0^0;
+sbit PWM38 = P0^1;
+sbit PWM37 = P0^2;
+sbit PWM36 = P0^3;
+sbit PWM35 = P0^4;
+sbit PWM34 = P0^5;
 
 volatile unsigned char uart_read;
 volatile unsigned char uart_read_count = 0;
@@ -74,6 +81,11 @@ unsigned char rs_pin_val,en_pin_val,d4_pin_val,d5_pin_val,d6_pin_val,d7_pin_val;
 unsigned long TIMER_VALUE, ONE_MS_VALUE;
 double T_MACHINE, F_MACHINE;
 unsigned int TIMER_VALUE_LOW, TIMER_VALUE_HIGH;
+
+unsigned char PWM_VAL_39,PWM_VAL_38,PWM_VAL_37,PWM_VAL_36,PWM_VAL_35,PWM_VAL_34;
+bit PWM_FLAG_39,PWM_FLAG_38,PWM_FLAG_37,PWM_FLAG_36,PWM_FLAG_35,PWM_FLAG_34;
+bit isAnalogWriteActive = 0;
+volatile unsigned char ovf_cnt = 0;
 
 void setup(void);		// executes only once
 void loop(void);		// executes infinitely
@@ -208,7 +220,8 @@ void delayTimerValueCalculation()
 
 void delay(unsigned long millisec)
 {
-	unsigned char tlow,thigh,isInterrupt;
+	unsigned char tlow,thigh;
+	bit isInterrupt;
 	unsigned int cnt;
 	isInterrupt = 0;
 	TMOD |= 0x02;
@@ -244,6 +257,117 @@ void delay(unsigned long millisec)
 long map(long x, long in_min, long in_max, long out_min, long out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void start_analogWrite()
+{
+	if(!(isAnalogWriteActive))
+	{
+		TMOD |= 0x20;
+		TH1 = 250;
+		EA = 1;
+		ET1 = 1;
+		TR1 = 1;
+		isAnalogWriteActive = 1;
+	}
+}
+
+void analogWrite39(unsigned char pwm)
+{
+	PWM_VAL_39 = pwm;
+	start_analogWrite();
+}
+
+void analogWrite38(unsigned char pwm)
+{
+	PWM_VAL_38 = pwm;
+	start_analogWrite();
+}
+
+void analogWrite37(unsigned char pwm)
+{
+	PWM_VAL_37 = pwm;
+	start_analogWrite();
+}
+
+void analogWrite36(unsigned char pwm)
+{
+	PWM_VAL_36 = pwm;
+	start_analogWrite();
+}
+
+void analogWrite35(unsigned char pwm)
+{
+	PWM_VAL_35 = pwm;
+	start_analogWrite();
+}
+
+void analogWrite34(unsigned char pwm)
+{
+	PWM_VAL_34 = pwm;
+	start_analogWrite();
+}
+
+void timer1_ovf() interrupt 3
+{
+	if(ovf_cnt == 255)
+		ovf_cnt = 0;
+	
+	ovf_cnt++;
+	
+	if(ovf_cnt > PWM_VAL_39)
+		PWM39 = 0;
+	else
+		PWM39 = 1;
+	
+	if(ovf_cnt > PWM_VAL_38)
+		PWM38 = 0;
+	else
+		PWM38 = 1;
+	
+	if(ovf_cnt > PWM_VAL_37)
+		PWM37 = 0;
+	else
+		PWM37 = 1;
+	
+	if(ovf_cnt > PWM_VAL_36)
+		PWM36 = 0;
+	else
+		PWM36 = 1;
+	
+	if(ovf_cnt > PWM_VAL_35)
+		PWM35 = 0;
+	else
+		PWM35 = 1;
+	
+	if(ovf_cnt > PWM_VAL_34)
+		PWM34 = 0;
+	else
+		PWM34 = 1;
+	
+	/*if(!PWM_FLAG)
+	{
+		PWM_FLAG = 1;
+		digitalWrite(PWM_PIN,HIGH);
+		TH1 = PWM_VAL;
+		TF1 = 0;
+		return;
+	}
+	else
+	{
+		PWM_FLAG = 0;
+		digitalWrite(PWM_PIN,LOW);
+		TH1 = 255 - PWM_VAL;
+		TF1 = 0;
+		return;
+	}*/
+}
+
+void clear_analogWrite()
+{
+	ET1 = 0;
+	TR1 = 0;
+	isAnalogWriteActive = 0;
 }
 
 void main()
