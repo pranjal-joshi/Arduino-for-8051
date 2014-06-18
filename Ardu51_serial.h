@@ -1,3 +1,21 @@
+/*
+	Author	:		Pranjal Joshi
+	Date		:		15/6/2014
+	Compiler:		Keil uV4
+	This header file is used for Arduino similar programming for 8051/8052 microcontrollers that allow easy
+	and arduino style programming, but it will increase code size & may affect efficiency. Not recommended
+	for timing critical applications or applications that require extremely fast program execution.
+	This is open source software.
+*/
+
+// SPECIAL HEADER FILE FOR SERIAL COMMUNICATION
+
+/*
+	NOTES:
+		*** MINIMUM BAUDRATE FOR 29.4912MHz IS 19200. (FOR 9600 USE 11.0592MHz OSC.).
+		*** MAXIMUM BAUDRATE WITH 29.4912MHz IS 115200.
+*/
+
 #include <Arduino51.h>
 
 void serial_begin(unsigned long baudrate)
@@ -82,4 +100,9 @@ void serial_printInt(long num)
 		}
 	}
 	serial_print(buf);
+}
+
+void serial_end()
+{
+	TR2 &= 0;
 }

@@ -1,3 +1,15 @@
+/*
+	Author	:		Pranjal Joshi
+	Date		:		15/6/2014
+	Compiler:		Keil uV4
+	This header file is used for Arduino similar programming for 8051/8052 microcontrollers that allow easy
+	and arduino style programming, but it will increase code size & may affect efficiency. Not recommended
+	for timing critical applications or applications that require extremely fast program execution.
+	This is open source software.
+*/
+
+// SPECIAL HEADER FILE FOR 4-BIT LCD INTERFACE
+
 
 #include <arduino51.h>
 
