@@ -1,7 +1,7 @@
 /*
-	Arduino51 Serial (UART) example.
+	Arduino51 I2C EEPROM example.
 	Author	: Pranjal Joshi
-	Date		: 18/6/2014
+	Date		: 27/6/2014
 	This example uses arduino style programming for interfacing external
 	I2C EEPROM with 8051.
 	This allow to store & retrive data on EEPROM chip.
