@@ -38,10 +38,22 @@ void i2c_begin()
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SDA = 0;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 0;
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	_nop_();
 	_nop_();
 }
@@ -51,10 +63,22 @@ void i2c_restart()
 	SDA = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SDA = 0;
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	_nop_();
 	_nop_();
 }
@@ -64,10 +88,22 @@ void i2c_end()
 	SDA = 0;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SDA = 1;
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	_nop_();
 	_nop_();
 }
@@ -77,10 +113,22 @@ void i2c_ack()
 	SDA = 0;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 0;
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	_nop_();
 	_nop_();
 }
@@ -90,10 +138,22 @@ void i2c_nak()
 	SDA = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 0;
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	_nop_();
 	_nop_();
 }
@@ -105,11 +165,15 @@ unsigned char i2c_write(unsigned char val)
 	{
 		SCL = 0;
 		_nop_();
+		_nop_();
+		_nop_();
 		if((val & 0x80) == 0)
 			SDA = 0;
 		else
 			SDA = 1;
 		SCL = 1;
+		_nop_();
+		_nop_();
 		_nop_();
 		val <<= 1;
 	}
@@ -118,18 +182,26 @@ unsigned char i2c_write(unsigned char val)
 	SCL = 1;
 	_nop_();
 	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
+	_nop_();
 	SCL = 0;
 	return !(ack_bit);
 }
 
-unsigned char i2c_read(bit ack_bit)
+unsigned char i2c_read()
 {
 	unsigned char value = 0;
 	for(I2C_COUNTER=0;I2C_COUNTER<8;I2C_COUNTER++)
 	{
 		SCL = 0;
 		_nop_();
+		_nop_();
+		_nop_();
 		SCL = 1;
+		_nop_();
+		_nop_();
 		_nop_();
 		if(SDA)
 			value |= 0x01;
@@ -145,7 +217,11 @@ unsigned char i2c_read(bit ack_bit)
 
 	SCL = 0;
 	_nop_();
+	_nop_();
+	_nop_();
 	SDA = 1;
+	_nop_();
+	_nop_();
 	_nop_();
 	return value;
 }

@@ -37,7 +37,19 @@ void eepromSetMemoryAddr(unsigned int addr)
 	i2c_write((unsigned char)addr & 0xFF);
 }
 
-void eeprom_write(unsigned int addr, unsigned char *val)
+void eeprom_write(unsigned int addr, unsigned char val)
+{
+	eepromSetMemoryAddr(addr);
+	_nop_();
+	_nop_();
+	i2c_write(val);
+	_nop_();
+	_nop_();
+	i2c_end();
+	delay(25);
+}
+
+void eeprom_writeBytes(unsigned int addr, unsigned char *val)
 {
 	eepromSetMemoryAddr(addr);
 	for(EEPROM_COUNTER=0;val[EEPROM_COUNTER]!=0;EEPROM_COUNTER++)
@@ -55,7 +67,7 @@ unsigned char eeprom_read(unsigned int addr)
 	eepromSetMemoryAddr(addr);
 	i2c_begin();
 	i2c_write(eeprom_addr + 1);
-	receivedData = i2c_read(NAK);
+	receivedData = i2c_read();
 	return receivedData;
 }
 
