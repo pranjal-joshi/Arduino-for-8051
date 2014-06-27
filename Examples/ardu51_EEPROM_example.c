@@ -10,6 +10,13 @@
 	E.g. AT24C04 or AT24C512B or AT24C1024
 	
 	DON'T FORGET TO SET I2C Addr. OF EEPROM IN CODE, IF U CHANGED IT THROUGH HARDWARE.
+	
+	HARDWARE PIN MAPPING:
+			
+			SDA --- PIN 21 (P2.0)
+			SCL --- PIN 22 (P2.1)
+			
+			WARNING ::: Never digitalWrite on PIN 21 & 22 while I2C bus is active!
 */
 
 #define F_OSC 11059200			// Define CPU freq.
