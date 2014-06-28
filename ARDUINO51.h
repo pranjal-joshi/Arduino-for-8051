@@ -23,7 +23,7 @@
 #ifndef __ARDUINO51_H__
 #define __ARDUINO51_H__
 
-//#define F_OSC 29491200 //11059200 //29491200	// oscillator freq.
+//#define F_OSC 29491200 //11059200 //29491200	// oscillator freq. DEFINE IN CODE <<<---
 
 #define HIGH 1 			// high means 1
 #define LOW 0				// low means 0
@@ -71,12 +71,6 @@ sbit PWM37 = P0^2;
 sbit PWM36 = P0^3;
 sbit PWM35 = P0^4;
 sbit PWM34 = P0^5;
-
-volatile unsigned char uart_read;
-volatile unsigned char uart_read_count = 0;
-
-unsigned char rs_pin,en_pin,d4_pin,d5_pin,d6_pin,d7_pin;
-unsigned char rs_pin_val,en_pin_val,d4_pin_val,d5_pin_val,d6_pin_val,d7_pin_val;
 
 unsigned long TIMER_VALUE, ONE_MS_VALUE;
 double T_MACHINE, F_MACHINE;
@@ -344,23 +338,6 @@ void timer1_ovf() interrupt 3
 		PWM34 = 0;
 	else
 		PWM34 = 1;
-	
-	/*if(!PWM_FLAG)
-	{
-		PWM_FLAG = 1;
-		digitalWrite(PWM_PIN,HIGH);
-		TH1 = PWM_VAL;
-		TF1 = 0;
-		return;
-	}
-	else
-	{
-		PWM_FLAG = 0;
-		digitalWrite(PWM_PIN,LOW);
-		TH1 = 255 - PWM_VAL;
-		TF1 = 0;
-		return;
-	}*/
 }
 
 void clear_analogWrite()
