@@ -42,7 +42,7 @@ void setup()
 	serial_println("Now reading 26 bytes from EEPROM...");
 	for(x=0;x<26;x++)			// read 26 location i.e. 26 alphabets from eeprom
 	{
-		serialSend(eeprom_read(x));		// use serialSend function to print single char on serial terminal.
+		serial_write(eeprom_read(x));		// use serialSend function to print single char on serial terminal.
 	}
 	serial_println("\r\nTest completed!");
 	// If you got A-Z alphabets on serial terminal then the test complited succesfully

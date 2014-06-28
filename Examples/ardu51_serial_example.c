@@ -38,11 +38,10 @@ void loop()
 	serial_println("println means print & jump to new line. no need to add '\n' at the end.");
 	
 	
-	serialSend(demo);			// sending single char value
+	serial_write(demo);			// sending single char value
 												// this will print '0' on terminal
 	
-	serial_printInt(x);		// This will print Int on terminal.. currently There is software bug
-												// in this function that prints number in reverse order.
+	serial_printInt(x);		// This will print Int on terminal.. BUG SOLVED! UPDATED!!
 	
 	delay(2000);					// wait for 2 seconds n loop back.
 }

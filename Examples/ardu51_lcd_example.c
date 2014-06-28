@@ -12,7 +12,7 @@
 #define F_OSC 11059200
 
 //*******************************
-			#define lcd_port P1			/****** <<<<-------<< IMPORTANT!
+			#define lcd_port P1			//****** <<<<-------<< IMPORTANT!
 //*******************************
 // MUST SPECIFY THE PORT TO WHICH LCD IS CONNECTED
 // FIRST 6 PINS OF GIVEN PORT WILL BE USED FOR LCD.
@@ -66,6 +66,10 @@ void loop()
 	lcd_displayOff();
 	delay(500);
 	lcd_displayOn();
+	delay(500);
+	lcd_clear();
+	lcd_setCursor(1,1);
+	lcd_printInt(8051);			// print any positive integer value on LCD.
 	delay(500);
 	lcd_clear();
 	delay(1500);

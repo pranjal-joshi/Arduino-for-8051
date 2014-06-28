@@ -51,16 +51,16 @@ void setup()
 
 void loop()
 {
-	serialSend(analogRead(3));		// read ADC channel & send data to serial port
+	serial_write(analogRead(3));		// read ADC channel & send data to serial port
 	delay(1);
 	x++;
 	if(x < 255)
-		DAC_write(x);				// write 8-bit data to DAC
+		DAC_write(x);				// write 8-bit data to DAC.
 	else
 		x = 0;
 	delay(1);
 	/*
-		This will create a Sawtooth waveform on DAC output & data readed
+		This will create a Sawtooth waveform on DAC output & data read
 		from ADC will be displayed on serial.
 	*/
 }
