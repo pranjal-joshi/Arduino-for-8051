@@ -1,3 +1,4 @@
+
 /*
 	Arduino51 LCD example.
 	Author	: Pranjal Joshi
@@ -36,7 +37,9 @@
 */
 
 #include <arduino51.h>				// basic file for Arduino51.
-#include <ardu_lcd51.h>				// LCD header for Arduino51.
+#include <ardu51_lcd.h>				// LCD header for Arduino51.
+
+int x;
 
 
 void setup()
@@ -69,8 +72,14 @@ void loop()
 	delay(500);
 	lcd_clear();
 	lcd_setCursor(1,1);
-	lcd_printInt(8051);			// print any positive integer value on LCD.
-	delay(500);
+	lcd_print("printing numbers:");
+	lcd_setCursor(2,1);
+	for(x=0;x<10;x++)
+	{
+		lcd_printInt(x);
+		delay(700);
+	}
+	delay(900);
 	lcd_clear();
 	delay(1500);
 }
