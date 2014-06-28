@@ -10,6 +10,8 @@
 
 // SPECIAL HEADER FILE FOR 4-BIT LCD INTERFACE
 
+#ifndef __ARDU51_LCD_H__
+#define __ARDU51_LCD_H__
 
 #include <arduino51.h>
 
@@ -19,6 +21,10 @@
 #define LCD_RS 0x10
 
 unsigned char COUNTER;
+char lcdbuf[8] = {0,0,0,0,0,0,0,0};
+char lcdbufInv[8] = {0,0,0,0,0,0,0,0};
+unsigned char lcdcnt = 0;
+unsigned char lcdcntInv = 0;
  
 void lcd_cmd(char cmd)
 {
@@ -140,3 +146,30 @@ void lcd_setCursor(unsigned char row, unsigned char coloumn)
 	lcd_cmd(COUNTER + coloumn - 1);
 }
 
+void lcd_printInt(unsigned long num)
+{
+	lcdcnt = 0;
+	lcdcntInv = 0;
+	if(num != 0)
+	{
+		while(num > 0)
+		{
+			lcdbuf[lcdcnt] = (num % 10) + 48;
+			num /= 10;
+			lcdcnt++;
+		}
+		while(lcdcnt > 0)
+		{
+			lcdcnt--;
+			lcdbufInv[lcdcntInv] = lcdbuf[lcdcnt];
+			lcdcntInv++;
+		}
+		lcd_print(lcdbufInv);
+	}
+	else
+	{
+		lcd_print("0");
+	}
+}
+
+#endif
