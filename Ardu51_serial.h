@@ -16,7 +16,20 @@
 		*** MAXIMUM BAUDRATE WITH 29.4912MHz IS 115200.
 */
 
+#ifndef __ARDU51_SERIAL_H__
+#define __ARDU51_SERIAL_H__
+
 #include <Arduino51.h>
+#include <math.h>
+#include <intrins.h>
+
+char serbuf[8] = {0,0,0,0,0,0,0,0};
+char serbufInv[8] = {0,0,0,0,0,0,0,0};
+unsigned char sercnt = 0;
+unsigned char sercntInv = 0;
+
+volatile unsigned char uart_read;
+volatile bit isRxDataAvailable = 0;
 
 void serial_begin(unsigned long baudrate)
 {
@@ -34,75 +47,103 @@ void serial_begin(unsigned long baudrate)
 	TR2 = 1;
 }
 
-void serial_read() interrupt 4
+void serialInterrupt() interrupt 4
 {
 	if(RI == 1)
 	{
 		RI = 0;
 		uart_read = SBUF;
-		uart_read_count++;
+		isRxDataAvailable = 1;
 	}
 	else
 		TI = 0;
 }
 
-void serialSend(unsigned char info)
+void serial_write(unsigned char info)
 {
 	SBUF = info;
-	delay(1);
+	_nop_();
+	_nop_();
 }
 
 void serial_print(unsigned char *str)
 {
 	unsigned int x;
 	for(x=0;str[x]!=0;x++)
-		serialSend(str[x]);
+		serial_write(str[x]);
 }
 
 void serial_println(unsigned char *str)
 {
 	unsigned int x;
 	for(x=0;str[x]!=0;x++)
-		serialSend(str[x]);
-	serialSend('\n');
-	serialSend('\r');
+		serial_write(str[x]);
+	serial_write('\n');
+	serial_write('\r');
 }
 
-void serial_printlnInt(long num)
+void serial_printlnInt(unsigned long num)
 {
-	char buf[8] = {0,0,0,0,
-								 0,0,0,0};
-	unsigned char cnt = 0;
+	sercnt = 0;
+	sercntInv = 0;
 	if(num != 0)
 	{
 		while(num > 0)
 		{
-			buf[cnt] = (num % 10) + 48;
+			serbuf[sercnt] = (num % 10) + 48;
 			num /= 10;
-			cnt++;
+			sercnt++;
 		}
+		while(sercnt > 0)
+		{
+			sercnt--;
+			serbufInv[sercntInv] = serbuf[sercnt];
+			sercntInv++;
+		}
+		serial_println(serbufInv);
 	}
-	serial_println(buf);
+	else
+	{
+		serial_println("0");
+	}
 }
 
-void serial_printInt(long num)
+void serial_printInt(unsigned long num)
 {
-	char buf[8] = {0,0,0,0,
-								 0,0,0,0};
-	unsigned char cnt = 0;
+	sercnt = 0;
+	sercntInv = 0;
 	if(num != 0)
 	{
 		while(num > 0)
 		{
-			buf[cnt] = (num % 10) + 48;
+			serbuf[sercnt] = (num % 10) + 48;
 			num /= 10;
-			cnt++;
+			sercnt++;
 		}
+		while(sercnt > 0)
+		{
+			sercnt--;
+			serbufInv[sercntInv] = serbuf[sercnt];
+			sercntInv++;
+		}
+		serial_print(serbufInv);
 	}
-	serial_print(buf);
+	else
+	{
+		serial_print("0");
+	}
 }
 
 void serial_end()
 {
 	TR2 &= 0;
 }
+
+unsigned char serial_read()
+{
+	while(!isRxDataAvailable);
+	isRxDataAvailable = 0;
+	return uart_read;
+}
+
+#endif
