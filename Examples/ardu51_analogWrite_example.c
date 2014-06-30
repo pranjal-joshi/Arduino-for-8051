@@ -14,6 +14,8 @@
 	analogWrite36(PWM_VALUE [0 - 255])		-			PWM on PIN36
 	analogWrite35(PWM_VALUE [0 - 255])		-			PWM on PIN35
 	analogWrite34(PWM_VALUE [0 - 255])		-			PWM on PIN34
+	
+	Copyright (C) 2014.		Pranjal P. Joshi. <joshi.pranjal5@gmail.com>
 
 */
 

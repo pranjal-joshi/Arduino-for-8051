@@ -17,6 +17,8 @@
 			SCL --- PIN 22 (P2.1)
 			
 			WARNING ::: Never digitalWrite on PIN 21 & 22 while I2C bus is active!
+			
+	Copyright (C) 2014.		Pranjal P. Joshi. <joshi.pranjal5@gmail.com>
 */
 
 #define F_OSC 11059200			// Define CPU freq.

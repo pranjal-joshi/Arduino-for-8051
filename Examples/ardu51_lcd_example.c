@@ -34,6 +34,8 @@
 		NOTE:		You can still use remaining pins of Px.
 		That is Px.6 & Px.7 can be used for other applications.
 		LCD data won't interfere with remaining pins!
+		
+	Copyright (C) 2014.		Pranjal P. Joshi. <joshi.pranjal5@gmail.com>
 */
 
 #include <arduino51.h>				// basic file for Arduino51.

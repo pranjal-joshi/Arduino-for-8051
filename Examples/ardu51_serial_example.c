@@ -16,6 +16,8 @@
 	// All devices having Timer 2 are supported even they are named as 8051 series.      //
 	// For eg. The code will work on AT89S52 & NXP P89V51Rxx series controllers.         //
 	///////////////////////////////////////////////////////////////////////////////////////
+	
+	Copyright (C) 2014.		Pranjal P. Joshi. <joshi.pranjal5@gmail.com>
 */
 
 #define F_OSC 11059200	// CPU Freq. in Hz..
@@ -25,7 +27,7 @@
 #include <ardu51_serial.h>	// header file for serial communication
 
 unsigned char demo = 48;
-unsigned int x = 1024;
+unsigned int x = 0;
 
 void setup()
 {
@@ -37,11 +39,15 @@ void loop()
 	serial_print("Arduino style programming on 8052.\n");
 	serial_println("println means print & jump to new line. no need to add '\n' at the end.");
 	
-	
+	serial_print("writing single char: ");
 	serial_write(demo);			// sending single char value
 												// this will print '0' on terminal
+	serial_print("\n\r");
 	
+	serial_print("Printing Integer: ");
 	serial_printInt(x);		// This will print Int on terminal.. BUG SOLVED! UPDATED!!
+	x++;
+	serial_println();
 	
 	delay(2000);					// wait for 2 seconds n loop back.
 }

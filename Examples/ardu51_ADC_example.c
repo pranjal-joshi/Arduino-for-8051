@@ -21,6 +21,8 @@
 				DAC_write(value)	:		AOUT		(PIN 15 of the chip)
 
 	Its recommended to Add 1uF capacitor between DAC output & GND for noise elimination.
+	
+	Copyright (C) 2014.		Pranjal P. Joshi. <joshi.pranjal5@gmail.com>
 */
 
 #define F_OSC 11059200				// define CPU freq.
